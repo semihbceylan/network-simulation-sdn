@@ -3,6 +3,14 @@ from tkinter import ttk
 import random
 import math
 
+# Simulated city border (a rough rectangle for Istanbul)
+CITY_BORDER = {
+    "x_min": 50,
+    "x_max": 750,
+    "y_min": 50,
+    "y_max": 550
+}
+
 # Parent class Antenna
 class Antenna:
     def __init__(self, name, position, range_radius, antenna_range):
@@ -76,43 +84,68 @@ class NetworkSimulationApp:
         self.canvas = tk.Canvas(self.root, width=800, height=600, bg="white")
         self.canvas.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
-        # Bind left mouse click to adding an antenna
+        # Bind left mouse click to adding an antenna, right-click to delete
         self.canvas.bind("<Button-1>", self.add_antenna_on_click)
+        self.canvas.bind("<Button-3>", self.delete_antenna_on_click)
+
+        # Draw city border (for Istanbul)
+        self.draw_city_border()
+
+    def draw_city_border(self):
+        """Draw a rectangle representing the city border."""
+        self.canvas.create_rectangle(CITY_BORDER["x_min"], CITY_BORDER["y_min"], CITY_BORDER["x_max"], CITY_BORDER["y_max"], outline="blue", dash=(4, 2))
 
     def add_antenna_on_click(self, event):
         # Get the mouse click coordinates and add an antenna at that position
         antenna_name = f"Antenna-{len(self.antennas) + 1}"
         position = (event.x, event.y)
-        range_radius = self.antenna_range.get()
-        antenna_to_antenna_range = self.antenna_to_antenna_range.get()
 
-        antenna = Antenna(antenna_name, position, range_radius, antenna_to_antenna_range)
-        self.antennas.append(antenna)
+        # Check if the click is inside the city border
+        if self.is_within_city_border(position):
+            range_radius = self.antenna_range.get()
+            antenna_to_antenna_range = self.antenna_to_antenna_range.get()
 
-        # Visualize the antenna on the canvas
-        x, y = position
-        self.canvas.create_oval(x - 10, y - 10, x + 10, y + 10, fill="red", tags=antenna_name)
-        self.canvas.create_text(x, y + 20, text=antenna_name)
+            antenna = Antenna(antenna_name, position, range_radius, antenna_to_antenna_range)
+            self.antennas.append(antenna)
+
+            # Visualize the antenna on the canvas
+            x, y = position
+            self.canvas.create_oval(x - 10, y - 10, x + 10, y + 10, fill="red", tags=antenna_name)
+            self.canvas.create_text(x, y + 20, text=antenna_name)
+
+    def delete_antenna_on_click(self, event):
+        # Delete an antenna if right-clicked on it
+        for antenna in self.antennas:
+            x, y = antenna.position
+            if (x - 10 <= event.x <= x + 10) and (y - 10 <= event.y <= y + 10):
+                self.antennas.remove(antenna)
+                self.canvas.delete(antenna.name)
+                self.canvas.delete("connection")
+                break
 
     def add_mobile_devices(self):
-        # Create small clusters of mobile devices in random areas
+        # Create small clusters of mobile devices in random areas within the city border
         num_clusters = 3
         devices_per_cluster = 10
 
         for cluster in range(num_clusters):
-            cluster_x = random.randint(100, 700)
-            cluster_y = random.randint(100, 500)
+            cluster_x = random.randint(CITY_BORDER["x_min"] + 30, CITY_BORDER["x_max"] - 30)  # Adjust to avoid going out of bounds
+            cluster_y = random.randint(CITY_BORDER["y_min"] + 30, CITY_BORDER["y_max"] - 30)
 
             for i in range(devices_per_cluster):
                 device_name = f"Device-{len(self.mobile_devices) + 1}"
-                position = (cluster_x + random.randint(-30, 30), cluster_y + random.randint(-30, 30))
+                x_offset = random.randint(-20, 20)
+                y_offset = random.randint(-20, 20)
+                position = (cluster_x + x_offset, cluster_y + y_offset)
 
-                device = MobileDevice(device_name, position)
-                self.mobile_devices.append(device)
+                # Ensure mobile devices stay within city borders
+                if self.is_within_city_border(position):
+                    device = MobileDevice(device_name, position)
+                    self.mobile_devices.append(device)
 
-                x, y = position
-                self.canvas.create_oval(x - 5, y - 5, x + 5, y + 5, fill="blue", tags=device_name)
-                self.canvas.create_text(x, y + 20, text=device_name)
+                    x, y = position
+                    self.canvas.create_oval(x - 5, y - 5, x + 5, y + 5, fill="blue", tags=device_name)
+                    self.canvas.create_text(x, y + 20, text=device_name)
 
     def show_connections(self):
         # Clear previous connections
@@ -139,6 +172,11 @@ class NetworkSimulationApp:
                     x2, y2 = antenna2.position
                     # Draw a line between connected antennas
                     self.canvas.create_line(x1, y1, x2, y2, fill="red", dash=(4, 2), tags="connection")
+
+    def is_within_city_border(self, position):
+        """Check if the position is within the predefined city border."""
+        x, y = position
+        return CITY_BORDER["x_min"] <= x <= CITY_BORDER["x_max"] and CITY_BORDER["y_min"] <= y <= CITY_BORDER["y_max"]
 
 if __name__ == "__main__":
     root = tk.Tk()
