@@ -145,7 +145,7 @@ class NetworkSimulationApp:
 
                     x, y = position
                     self.canvas.create_oval(x - 5, y - 5, x + 5, y + 5, fill="blue", tags=device_name)
-                    self.canvas.create_text(x, y + 20, text=device_name)
+                    #self.canvas.create_text(x, y + 20, text=device_name)
 
     def show_connections(self):
         # Clear previous connections
