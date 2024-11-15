@@ -95,6 +95,24 @@ class NetworkSimulationApp:
         """Draw a rectangle representing the city border."""
         self.canvas.create_rectangle(CITY_BORDER["x_min"], CITY_BORDER["y_min"], CITY_BORDER["x_max"], CITY_BORDER["y_max"], outline="blue", dash=(4, 2))
 
+    def delete_antenna_on_click(self, event):
+        # Delete an antenna if right-clicked on it
+        for antenna in self.antennas:
+            x, y = antenna.position
+            if (x - 10 <= event.x <= x + 10) and (y - 10 <= event.y <= y + 10):
+                # Reset connected devices to unconnected (blue)
+                for device in antenna.connected_devices:
+                    device.connected_antenna = None
+                    x2, y2 = device.position
+                    self.canvas.create_oval(x2 - 5, y2 - 5, x2 + 5, y2 + 5, fill="blue", tags=device.name)
+
+                # Remove antenna from list and delete visuals
+                self.antennas.remove(antenna)
+                self.canvas.delete(antenna.name)  # Delete antenna shape
+                self.canvas.delete("connection")  # Remove connections
+                self.canvas.delete(f"text_{antenna.name}")  # Remove antenna label
+                break
+
     def add_antenna_on_click(self, event):
         # Get the mouse click coordinates and add an antenna at that position
         antenna_name = f"Antenna-{len(self.antennas) + 1}"
@@ -111,17 +129,8 @@ class NetworkSimulationApp:
             # Visualize the antenna on the canvas
             x, y = position
             self.canvas.create_oval(x - 10, y - 10, x + 10, y + 10, fill="red", tags=antenna_name)
-            self.canvas.create_text(x, y + 20, text=antenna_name)
+            self.canvas.create_text(x, y + 20, text=antenna_name, tags=f"text_{antenna_name}")  # Add tag to text for deletion
 
-    def delete_antenna_on_click(self, event):
-        # Delete an antenna if right-clicked on it
-        for antenna in self.antennas:
-            x, y = antenna.position
-            if (x - 10 <= event.x <= x + 10) and (y - 10 <= event.y <= y + 10):
-                self.antennas.remove(antenna)
-                self.canvas.delete(antenna.name)
-                self.canvas.delete("connection")
-                break
 
     def add_mobile_devices(self):
         # Create small clusters of mobile devices in random areas within the city border
