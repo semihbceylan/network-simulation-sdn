@@ -18,12 +18,16 @@ def run_simulation2():
 def run_simulation3():
     subprocess.run(['python', os.path.join(current_dir, 'sim.py')])
 
+# Function to run Simulation 4
+def run_simulation4():
+    subprocess.run(['python', os.path.join(current_dir, 'core.py')])
+
 # Create the main window
 window = tk.Tk()
 window.title("Simulation Selector")
 
 # Set window size and background color to match the style
-window.geometry("400x250")  # Increased size for third button
+window.geometry("400x400")  # Increased size for fourth button
 window.configure(bg='#001f26')  # Dark background
 
 # Custom styles to match the theme
@@ -60,6 +64,9 @@ button2.pack(pady=10)
 
 button3 = ttk.Button(window, text="Abstract Model", command=run_simulation3)
 button3.pack(pady=10)
+
+button4 = ttk.Button(window, text="Command Center", command=run_simulation4)
+button4.pack(pady=10)
 
 # Add a glowing effect around the buttons
 def apply_glow(widget):
