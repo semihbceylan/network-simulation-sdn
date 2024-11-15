@@ -1,3 +1,6 @@
+# This code shows Geolocation data on a map.
+# This can be used on antenna code on main.py
+
 import tkinter as tk
 from tkinter import ttk
 import matplotlib.pyplot as plt
