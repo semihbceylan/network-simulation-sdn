@@ -74,8 +74,8 @@ class NetworkSimulationApp:
         ttk.Label(control_frame, text="Antenna-to-Antenna Range:").grid(row=1, column=0, sticky=tk.W)
         self.antenna_to_antenna_range = tk.IntVar(value=200)  # Default range for antenna-to-antenna
 
-        # Add button to add mobile devices in clusters
-        ttk.Button(control_frame, text="Add Mobile Devices", command=self.add_mobile_devices).grid(row=2, column=0, columnspan=2)
+        # Add button to populate space with random clusters
+        ttk.Button(control_frame, text="Populate Space", command=self.populate_space_with_clusters).grid(row=2, column=0, columnspan=2)
 
         # Add button to show connections
         ttk.Button(control_frame, text="Show Connections", command=self.show_connections).grid(row=3, column=0, columnspan=2)
@@ -90,6 +90,34 @@ class NetworkSimulationApp:
 
         # Draw city border (for Istanbul)
         self.draw_city_border()
+
+    def populate_space_with_clusters(self):
+        """Populate the entire space with randomly distributed mobile device clusters."""
+        num_clusters = 10  # Number of clusters to generate
+        devices_per_cluster = 10  # Number of devices per cluster
+
+        for _ in range(num_clusters):
+            # Randomly choose a cluster center within the city border
+            cluster_x = random.randint(CITY_BORDER["x_min"] + 30, CITY_BORDER["x_max"] - 30)
+            cluster_y = random.randint(CITY_BORDER["y_min"] + 30, CITY_BORDER["y_max"] - 30)
+
+            # Create devices around this cluster center
+            for i in range(devices_per_cluster):
+                device_name = f"Device-{len(self.mobile_devices) + 1}"
+                # Randomly offset device positions within a small range around the cluster center
+                x_offset = random.randint(-20, 20)
+                y_offset = random.randint(-20, 20)
+                position = (cluster_x + x_offset, cluster_y + y_offset)
+
+                # Ensure the device stays within city borders
+                if self.is_within_city_border(position):
+                    device = MobileDevice(device_name, position)
+                    self.mobile_devices.append(device)
+
+                    x_device, y_device = position
+                    self.canvas.create_oval(
+                        x_device - 5, y_device - 5, x_device + 5, y_device + 5, fill="blue", tags=device_name
+                    )
 
     def draw_city_border(self):
         """Draw a rectangle representing the city border."""
