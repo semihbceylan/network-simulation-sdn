@@ -22,6 +22,12 @@ def run_simulation3():
 def run_simulation4():
     subprocess.run(['python', os.path.join(current_dir, 'core.py')])
 
+# Function to run Simulation 5
+def run_simulation5():
+    subprocess.run(['python', os.path.join(current_dir, 'map.py')])
+
+
+
 # Create the main window
 window = tk.Tk()
 window.title("Simulation Selector")
@@ -68,6 +74,9 @@ button3.pack(pady=10)
 button4 = ttk.Button(window, text="Command Center", command=run_simulation4)
 button4.pack(pady=10)
 
+button5 = ttk.Button(window, text="Provinces of Turkey", command=run_simulation5)
+button5.pack(pady=10)
+
 # Add a glowing effect around the buttons
 def apply_glow(widget):
     def on_enter(event):
@@ -89,6 +98,8 @@ style.configure('Glow.TButton',
 apply_glow(button1)
 apply_glow(button2)
 apply_glow(button3)
+apply_glow(button4)
+apply_glow(button5)
 
 # Run the GUI loop
 window.mainloop()

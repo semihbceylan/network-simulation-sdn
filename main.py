@@ -116,7 +116,7 @@ class NetworkSimulationApp:
 
                     x_device, y_device = position
                     self.canvas.create_oval(
-                        x_device - 5, y_device - 5, x_device + 5, y_device + 5, fill="blue", tags=device_name
+                        x_device - 5, y_device - 5, x_device + 5, y_device + 5, fill="blue", tags=("device", device_name)
                     )
 
     def draw_city_border(self):
@@ -154,10 +154,10 @@ class NetworkSimulationApp:
             antenna = Antenna(antenna_name, position, range_radius, antenna_to_antenna_range)
             self.antennas.append(antenna)
 
-            # Visualize the antenna on the canvas
+            # Visualize the antenna on the canvas (ensure it is on top of devices)
             x, y = position
-            self.canvas.create_oval(x - 10, y - 10, x + 10, y + 10, fill="red", tags=antenna_name)
-            self.canvas.create_text(x, y + 20, text=antenna_name, tags=f"text_{antenna_name}")  # Add tag to text for deletion
+            self.canvas.create_oval(x - 10, y - 10, x + 10, y + 10, fill="red", tags=("antenna", antenna_name))
+            self.canvas.create_text(x, y + 20, text=antenna_name, tags=("antenna_text", f"text_{antenna_name}"))  # Add tag for deletion
 
 
     def add_mobile_devices(self):
