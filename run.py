@@ -24,7 +24,7 @@ def run_simulation4():
 
 # Function to run Simulation 5
 def run_simulation5():
-    subprocess.run(['python', os.path.join(current_dir, 'map.py')])
+    subprocess.run(['python', os.path.join(current_dir, 'mapped_main.py')])
 
 
 
@@ -74,7 +74,7 @@ button3.pack(pady=10)
 button4 = ttk.Button(window, text="Command Center", command=run_simulation4)
 button4.pack(pady=10)
 
-button5 = ttk.Button(window, text="Provinces of Turkey", command=run_simulation5)
+button5 = ttk.Button(window, text="Urban User", command=run_simulation5)
 button5.pack(pady=10)
 
 # Add a glowing effect around the buttons

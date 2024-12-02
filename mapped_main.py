@@ -89,18 +89,85 @@ class NetworkSimulationApp:
                     break
         except FileNotFoundError:
             print(f"Error: GeoJSON file not found at {GEOJSON_FILE_PATH}")
+
     def draw_city_border(self, coordinates):
         lons, lats = zip(*coordinates)
-        # Adjust the scale factor (increase it for a larger city)
-        scale_factor = 15  # Increase this value to make the city larger
-        scaled_coords = [(lon * scale_factor, lat * -scale_factor + 600) for lon, lat in coordinates]
+
+        # Get the canvas dimensions
+        self.canvas.update()  # Ensure the canvas dimensions are updated
+        canvas_width = self.canvas.winfo_width()
+        canvas_height = self.canvas.winfo_height()
+
+        # Calculate the bounding box of the city's coordinates
+        min_lon, max_lon = min(lons), max(lons)
+        min_lat, max_lat = min(lats), max(lats)
+
+        # Calculate scaling factors for the map to fit within the canvas
+        lon_range = max_lon - min_lon
+        lat_range = max_lat - min_lat
+
+        if lon_range == 0 or lat_range == 0:
+            print("Error: Invalid city boundary coordinates.")
+            return
+
+        scale_factor = min(
+            (canvas_width - 20) / lon_range,  # 20 pixels padding on width
+            (canvas_height - 20) / lat_range  # 20 pixels padding on height
+        )
+
+        # Calculate offsets to center the map on the canvas
+        x_offset = (canvas_width - lon_range * scale_factor) / 2
+        y_offset = (canvas_height - lat_range * scale_factor) / 2
+
+        # Transform and scale the coordinates to fit on the canvas
+        scaled_coords = [
+            (
+                (lon - min_lon) * scale_factor + x_offset,
+                canvas_height - ((lat - min_lat) * scale_factor + y_offset)
+            )
+            for lon, lat in coordinates
+        ]
+
+        # Draw the city border
         self.canvas.create_polygon(scaled_coords, outline="blue", fill="", width=2)
+
+        # Debugging: print scaled coordinates to check values
+        print(f"Scaled coordinates: {scaled_coords}")
+        print(f"Canvas size: {canvas_width}x{canvas_height}")
+        print(f"Scale factor: {scale_factor}, Offsets: ({x_offset}, {y_offset})")
+
 
     def is_within_city_border(self, position):
         if self.city_polygon:
-            point = Point(position[0] / 10, (600 - position[1]) / -10)
+            # Transform canvas coordinates back to original longitude/latitude
+            canvas_width = self.canvas.winfo_width()
+            canvas_height = self.canvas.winfo_height()
+
+            lons, lats = zip(*list(self.city_polygon.exterior.coords))
+            min_lon, max_lon = min(lons), max(lons)
+            min_lat, max_lat = min(lats), max(lats)
+
+            lon_range = max_lon - min_lon
+            lat_range = max_lat - min_lat
+
+            scale_factor = min(
+                (canvas_width - 20) / lon_range,  # 20 pixels padding on width
+                (canvas_height - 20) / lat_range  # 20 pixels padding on height
+            )
+
+            x_offset = (canvas_width - lon_range * scale_factor) / 2
+            y_offset = (canvas_height - lat_range * scale_factor) / 2
+
+            # Reverse transformation from canvas to geo-coordinates
+            geo_x = (position[0] - x_offset) / scale_factor + min_lon
+            geo_y = (canvas_height - position[1] - y_offset) / scale_factor + min_lat
+
+            # Check if the point is inside the polygon
+            point = Point(geo_x, geo_y)
             return self.city_polygon.contains(point)
+
         return False
+
 
     def add_antenna_on_click(self, event):
         position = (event.x, event.y)
