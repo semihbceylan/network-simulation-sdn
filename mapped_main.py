@@ -55,7 +55,15 @@ class NetworkSimulationApp:
         self.city_polygon = None
         self.create_widgets()
         self.load_city_border()
-
+    
+    def get_city_names(geojson_data):
+        """Extract and sort city names from GeoJSON data."""
+        return sorted(
+            feature["properties"]["name"]
+            for feature in geojson_data.get("features", [])
+            if "name" in feature["properties"]
+    )
+    
     def create_widgets(self):
         control_frame = ttk.Frame(self.root, padding="10")
         control_frame.grid(row=0, column=0, sticky=(tk.W, tk.E))
